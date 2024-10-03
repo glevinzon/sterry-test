@@ -1,4 +1,3 @@
-// api/auth.ts
 import { NextResponse } from "next/server";
 
 const users = [

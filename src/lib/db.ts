@@ -1,11 +1,10 @@
 import mongoose from "mongoose";
 
-const MONGO_URI =
-  "mongodb+srv://glevinzond:yjvY5q0eQmRZXUaT@sterrytest.pwpgl.mongodb.net/db_sterry?retryWrites=true&w=majority&appName=sterrytest";
+const { MONGODB_URI } = process.env;
 
 export const dbConnect = async () => {
   try {
-    const { connection } = await mongoose.connect(MONGO_URI as string);
+    const { connection } = await mongoose.connect(MONGODB_URI as string);
     connection.on("error", (err) => {
       console.error(err);
     });
