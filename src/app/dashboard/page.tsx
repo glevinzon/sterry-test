@@ -1,5 +1,5 @@
 "use client";
-import { useRouter } from "next/navigation";
+
 import React, { useState, FC } from "react";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
@@ -50,6 +50,16 @@ const DashboardPage: FC = () => {
       queryClient.invalidateQueries({ queryKey: ["products"] });
       setShowForm(false);
       reset();
+    },
+  });
+
+  const { mutate: deleteProduct, isPending: isDeleting } = useMutation({
+    mutationFn: async (id: string) =>
+      await fetch(`/api/product/?id=${id}`, {
+        method: "DELETE",
+      }).then(async (res) => await res.json()),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["products"] });
     },
   });
 
@@ -253,8 +263,11 @@ const DashboardPage: FC = () => {
                         <button className="block py-2 px-4 hover:bg-gray-100 ">
                           Edit
                         </button>
-                        <button className="block py-2 px-4 text-sm text-gray-700 hover:bg-gray-100 ">
-                          Delete
+                        <button
+                          onClick={() => deleteProduct(item._id)}
+                          className="block py-2 px-4 text-sm text-gray-700 hover:bg-gray-100 "
+                        >
+                          {isDeleting ? "Deleting..." : "Delete"}
                         </button>
                       </td>
                     </tr>
