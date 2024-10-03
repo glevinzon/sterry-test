@@ -26,6 +26,7 @@ const schema = yup.object().shape({
 
 const DashboardPage: FC = () => {
   const [showForm, setShowForm] = useState(false);
+  const [editingProductId, setEditingProductId] = useState<string | null>(null);
   const queryClient = useQueryClient();
 
   const {
@@ -33,23 +34,28 @@ const DashboardPage: FC = () => {
     handleSubmit,
     formState: { errors },
     reset,
+    setValue,
   } = useForm<FormInput>({
     resolver: yupResolver(schema),
   });
 
   const { mutate, isPending: isLoading } = useMutation({
-    mutationFn: async (data: FormInput) =>
-      await fetch("/api/product", {
-        method: "POST",
+    mutationFn: async (data: FormInput & { id?: string }) => {
+      const method = data.id ? "PUT" : "POST";
+      const url = data.id ? `/api/product/?id=${data.id}` : "/api/product";
+      return await fetch(url, {
+        method,
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify(data),
-      }).then(async (res) => await res.json()),
+      }).then(async (res) => await res.json());
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["products"] });
       setShowForm(false);
       reset();
+      setEditingProductId(null);
     },
   });
 
@@ -77,6 +83,16 @@ const DashboardPage: FC = () => {
       await fetch("/api/product").then(async (res) => await res.json()),
   });
 
+  const handleEdit = (product: ProductDocument) => {
+    setEditingProductId(product._id);
+    setShowForm(true);
+    setValue("name", product.name);
+    setValue("category", product.category);
+    setValue("brand", product.brand);
+    setValue("description", product.description);
+    setValue("price", product.price);
+  };
+
   if (isFetching)
     return (
       <p className="flex justify-center items-center h-screen">Loading...</p>
@@ -92,7 +108,7 @@ const DashboardPage: FC = () => {
             Product
           </h2>
           <p className="mt-1 text-sm leading-6 text-gray-600">
-            A list of product
+            A list of products available for purchase.
           </p>
         </div>
         <button
@@ -205,7 +221,11 @@ const DashboardPage: FC = () => {
                 type="submit"
                 className="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
               >
-                {isLoading ? "Creating..." : "Create"}
+                {isLoading
+                  ? "Saving..."
+                  : editingProductId
+                  ? "Update"
+                  : "Create"}
               </button>
               <button
                 type="button"
@@ -260,7 +280,10 @@ const DashboardPage: FC = () => {
                       <td className="px-4 py-3">{item.description}</td>
                       <td className="px-4 py-3">{item.price}</td>
                       <td className="px-4 py-3 flex items-center justify-end">
-                        <button className="block py-2 px-4 hover:bg-gray-100 ">
+                        <button
+                          onClick={() => handleEdit(item)}
+                          className="block py-2 px-4 hover:bg-gray-100 "
+                        >
                           Edit
                         </button>
                         <button
