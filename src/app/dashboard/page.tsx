@@ -52,10 +52,14 @@ const DashboardPage: FC = () => {
     resolver: yupResolver(schema),
   });
 
+  //Todo: move this in a hook, if deem necessary for reusability
+  //Todo: create an api.ts file to global lib for endpoints calls
   const { mutate, isPending: isLoading } = useMutation({
-    mutationFn: async (data: FormInput & { id?: string }) => {
-      const method = data.id ? "PUT" : "POST";
-      const url = data.id ? `/api/product/?id=${data.id}` : "/api/product";
+    mutationFn: async (data: FormInput) => {
+      const method = editingProductId ? "PUT" : "POST";
+      const url = editingProductId
+        ? `/api/product/?id=${editingProductId}`
+        : "/api/product";
       return await fetch(url, {
         method,
         headers: {

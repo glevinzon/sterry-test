@@ -6,6 +6,7 @@ import { dbConnect } from "@/lib/db";
 export const GET = async () => {
   try {
     await dbConnect();
+
     const products = await Product.find();
     return NextResponse.json({ products });
   } catch (error) {
@@ -17,6 +18,7 @@ export const GET = async () => {
 export const POST = async (req: NextRequest) => {
   const { name, category, brand, description, price } = await req.json();
   const product = new Product({ name, category, brand, description, price });
+
   await product.save();
   return NextResponse.json({ product });
 };
@@ -25,13 +27,17 @@ export const POST = async (req: NextRequest) => {
 export const DELETE = async (req: NextRequest) => {
   const url = new URL(req.url).searchParams;
   const id = url.get("id");
+
   await Product.findByIdAndDelete(id);
   return NextResponse.json({});
 };
 
 // Action to update or edit
 export const PUT = async (req: NextRequest) => {
-  const { name, category, brand, description, price, id } = await req.json();
+  const url = new URL(req.url).searchParams;
+  const id = url.get("id");
+  const { name, category, brand, description, price } = await req.json();
+
   await Product.findByIdAndUpdate(id, {
     name,
     category,
