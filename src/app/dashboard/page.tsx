@@ -38,6 +38,8 @@ const DashboardPage: FC = () => {
       position: "bottom-center",
       isLoading: false,
       type: type,
+      delay: 2000,
+      hideProgressBar: true,
     });
 
   const {
