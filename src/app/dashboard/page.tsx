@@ -6,6 +6,7 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { ProductDocument } from "@/models/Product";
+import { toast } from "react-toastify";
 
 type FormInput = Omit<ProductDocument, "_id">;
 
@@ -28,6 +29,15 @@ const DashboardPage: FC = () => {
   const [showForm, setShowForm] = useState(false);
   const [editingProductId, setEditingProductId] = useState<string | null>(null);
   const queryClient = useQueryClient();
+  const notify = (
+    message: string,
+    type: "info" | "success" | "warning" | "error" | "default"
+  ) =>
+    toast(message, {
+      position: "bottom-center",
+      isLoading: false,
+      type: type,
+    });
 
   const {
     register,
@@ -56,6 +66,7 @@ const DashboardPage: FC = () => {
       setShowForm(false);
       reset();
       setEditingProductId(null);
+      notify("Saving product success", "success");
     },
   });
 
@@ -66,6 +77,7 @@ const DashboardPage: FC = () => {
       }).then(async (res) => await res.json()),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["products"] });
+      notify("Product deleted", "info");
     },
   });
 
