@@ -7,6 +7,7 @@ import * as yup from "yup";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { ProductDocument } from "@/models/Product";
 import { toast } from "react-toastify";
+import ProductTable from "./components/productTable";
 
 type FormInput = Omit<ProductDocument, "_id">;
 
@@ -70,7 +71,7 @@ const DashboardPage: FC = () => {
     },
   });
 
-  const { mutate: deleteProduct, isPending: isDeleting } = useMutation({
+  const { mutate: deleteProduct } = useMutation({
     mutationFn: async (id: string) =>
       await fetch(`/api/product/?id=${id}`, {
         method: "DELETE",
@@ -252,66 +253,11 @@ const DashboardPage: FC = () => {
       )}
 
       <div className="mx-auto p-4 ">
-        <div className="bg-white relative shadow-md sm:rounded-lg overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm text-left text-gray-500 ">
-              <thead className="text-xs text-gray-700 uppercase bg-gray-100 ">
-                <tr>
-                  <th scope="col" className="px-4 py-3">
-                    Product name
-                  </th>
-                  <th scope="col" className="px-4 py-3">
-                    Category
-                  </th>
-                  <th scope="col" className="px-4 py-3">
-                    Brand
-                  </th>
-                  <th scope="col" className="px-4 py-3">
-                    Description
-                  </th>
-                  <th scope="col" className="px-4 py-3">
-                    Price
-                  </th>
-                  <th scope="col" className="px-4 py-3">
-                    <span className="sr-only">Actions</span>
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {data.products.map((item) => {
-                  return (
-                    <tr key={item._id} className="border-b ">
-                      <th
-                        scope="row"
-                        className="px-4 py-3 font-medium text-gray-900 whitespace-nowrap "
-                      >
-                        {item.name}
-                      </th>
-                      <td className="px-4 py-3">{item.category}</td>
-                      <td className="px-4 py-3">{item.brand}</td>
-                      <td className="px-4 py-3">{item.description}</td>
-                      <td className="px-4 py-3">{item.price}</td>
-                      <td className="px-4 py-3 flex items-center justify-end">
-                        <button
-                          onClick={() => handleEdit(item)}
-                          className="block py-2 px-4 hover:bg-gray-100 "
-                        >
-                          Edit
-                        </button>
-                        <button
-                          onClick={() => deleteProduct(item._id)}
-                          className="block py-2 px-4 text-sm text-gray-700 hover:bg-gray-100 "
-                        >
-                          {isDeleting ? "Deleting..." : "Delete"}
-                        </button>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-        </div>
+        <ProductTable
+          products={data.products}
+          handleEdit={handleEdit}
+          handleDelete={deleteProduct}
+        />
       </div>
     </section>
   );
